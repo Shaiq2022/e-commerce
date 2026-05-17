@@ -9,54 +9,70 @@ export default function Home() {
   const [category, setCategory] = useState("all");
   const [showCart, setShowCart] = useState(false);
   const [cart, setCart] = useState(() => {
-  const saved = localStorage.getItem("cart");
-  return saved ? JSON.parse(saved) : [];
-});
+    const saved = localStorage.getItem("cart");
+    return saved ? JSON.parse(saved) : [];
+  });
 
-  // 🔹 Fetch products from proxy server
+  // 🔹 Fetch products from DummyJSON
   useEffect(() => {
-  console.log("PRODUCTS:", products);
-}, [products]);
-  useEffect(() => {
-  fetch("http://localhost:5000/products")  // 🔹 buradakı URL
-    .then(res => res.json())
-    .then(data => {
-      console.log(data.products); // ✅ məhsullar burda görünəcək
-      setProducts(data.products);
-      setLoading(false);
-    })
-    .catch(err => {
-      setError(err.message);
-      setLoading(false);
-    });
-}, []);
+    setLoading(true);
+    setError(null);
 
-  // 🔹 Filtered products
+    fetch("https://dummyjson.com/products")
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Serverdən cavab alınmadı (Şəbəkə xətası)");
+        }
+        return res.json();
+      })
+      .then((data) => {
+        if (data && data.products) {
+          setProducts(data.products);
+        } else if (Array.isArray(data)) {
+          setProducts(data);
+        } else {
+          throw new Error("Məlumat formatı düzgün deyil");
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Xəta yarandı:", err);
+        setError(err.message); // Xətanı state-ə yazırıq ki ekranda görünsün
+        setLoading(false);
+      });
+  }, []);
+
+  // 🔹 Filtered products (Təhlükəsiz filter)
   const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.title
+    if (!product) return false;
+
+    // Əgər title yoxdursa boş string qəbul edirik ki .toLowerCase() xəta verməsin
+    const title = product.title || "";
+    const productCategory = product.category || "";
+
+    const matchesSearch = title
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
+
     const matchesCategory =
-      category === "all" || product.category === category;
+      category === "all" || 
+      productCategory.toLowerCase() === category.toLowerCase();
+
     return matchesSearch && matchesCategory;
   });
 
   // 🔹 Cart functions
- const addToCart = (product) => {
-  setCart((prev) => {
-    const exist = prev.find((item) => item.id === product.id);
-
-    if (exist) {
-      return prev.map((item) =>
-        item.id === product.id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      );
-    }
-
-    return [...prev, { ...product, quantity: 1 }];
-  });
-};
+  const addToCart = (product) => {
+    setCart((prev) => {
+      const exist = prev.find((item) => item.id === product.id);
+      if (exist) {
+        return prev.map((item) =>
+          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+        );
+      }
+      return [...prev, { ...product, quantity: 1 }];
+    });
+  };
 
   const increaseQuantity = (id) =>
     setCart((prev) =>
@@ -75,18 +91,16 @@ export default function Home() {
     );
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-  const totalPrice = cart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
- useEffect(() => {
-  localStorage.setItem("cart", JSON.stringify(cart));
-}, [cart]);
-useEffect(() => {
-  localStorage.setItem("cart", JSON.stringify(cart));
-}, [cart]);
-  if (loading) return <h2>Loading...</h2>;
-  if (error) return <h2>Error: {error}</h2>;
+  const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+  // Cart LocalStorage Sync
+  useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(cart));
+  }, [cart]);
+
+  // Ekran Vəziyyətləri
+  if (loading) return <h2 style={{ padding: "20px" }}>Loading... (Məhsullar yüklənir)</h2>;
+  if (error) return <h2 style={{ padding: "20px", color: "red" }}>Error: {error}</h2>;
 
   return (
     <div style={{ padding: "20px" }}>
@@ -105,7 +119,6 @@ useEffect(() => {
           style={{ padding: "5px" }}
         >
           <option value="all">All</option>
-          {/* DummyJSON categories */}
           <option value="smartphones">Smartphones</option>
           <option value="laptops">Laptops</option>
           <option value="fragrances">Fragrances</option>
@@ -117,10 +130,10 @@ useEffect(() => {
       {/* Products Grid */}
       <Products products={filteredProducts} addToCart={addToCart} />
 
-      {/* Cart */}
+      {/* Cart Section */}
       <div style={{ marginTop: "20px" }}>
         <div
-          style={{ cursor: "pointer", marginBottom: "10px" }}
+          style={{ cursor: "pointer", marginBottom: "10px", fontWeight: "bold" }}
           onClick={() => setShowCart(!showCart)}
         >
           🛒 Cart ({totalItems})
@@ -149,26 +162,18 @@ useEffect(() => {
                     marginBottom: "10px",
                   }}
                 >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                    }}
-                  >
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                     <img src={item.thumbnail} width="40" alt={item.title} />
                     <span>
-                      {item.title.length > 30
+                      {item.title && item.title.length > 30
                         ? item.title.slice(0, 30) + "..."
                         : item.title}
                     </span>
-                    <span style={{ fontSize: "20px", color: "green" }}>
+                    <span style={{ fontSize: "16px", color: "green", fontWeight: "bold" }}>
                       ${item.price}
                     </span>
                   </div>
-                  <div
-                    style={{ display: "flex", alignItems: "center", gap: "5px" }}
-                  >
+                  <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
                     <button onClick={() => decreaseQuantity(item.id)}>➖</button>
                     <span>{item.quantity}</span>
                     <button onClick={() => increaseQuantity(item.id)}>➕</button>
@@ -176,7 +181,9 @@ useEffect(() => {
                 </div>
               ))
             )}
-            <button onClick={() => setCart([])}>Clear Cart</button>
+            <button onClick={() => setCart([])} style={{ marginTop: "10px" }}>
+              Clear Cart
+            </button>
           </div>
         )}
 
