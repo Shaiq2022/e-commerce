@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="perfectShopGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF5E3A" />
+      <stop offset="100%" stop-color="#FF2A68" />
+    </linearGradient>
+  </defs>
+  
+  <path d="M 110 100 H 140 L 175 250 H 390 L 430 110 H 160" fill="none" stroke="url(#perfectShopGrad)" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="110" y1="100" x2="85" y2="100" stroke="url(#perfectShopGrad)" stroke-width="24" stroke-linecap="round" />
+  
+  <path d="M 170 310 C 170 345, 230 345, 256 310 C 282 275, 342 275, 342 310" fill="none" stroke="url(#perfectShopGrad)" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <path d="M 242 322 Q 205 355, 185 352" fill="none" stroke="url(#perfectShopGrad)" stroke-width="20" stroke-linecap="round"/>
+  
+  <circle cx="170" cy="405" r="32" fill="url(#perfectShopGrad)" />
+  <circle cx="342" cy="405" r="32" fill="url(#perfectShopGrad)" />
+  <circle cx="170" cy="405" r="12" fill="#FFFFFF" />
+  <circle cx="342" cy="405" r="12" fill="#FFFFFF" />
+  
+  <line x1="200" y1="250" x2="200" y2="290" stroke="url(#perfectShopGrad)" stroke-width="16" stroke-linecap="round"/>
+  <line x1="360" y1="250" x2="330" y2="285" stroke="url(#perfectShopGrad)" stroke-width="16" stroke-linecap="round"/>
+</svg>
